@@ -128,7 +128,7 @@ Link configuration directories using:
 
 # Developer tools
 
-Open environments in your editor:
+Open environments in VS Code or VSCodium:
 
   ./scripts/dev-open.sh real-home
   ./scripts/dev-open.sh fake-home omarchy
@@ -155,4 +155,16 @@ Optional:
 
 # About this project
 
-I am new to Linux, and I have not worked with PC customization since I was a kid. Thanks to people in the community, especially creators like Chris Titus, I rediscovered my interest
+I am new to Linux, and I have not worked with PC customization since I was a kid. Thanks to people in the community, especially creators like Chris Titus, I rediscovered my interest in experimenting with computers.
+
+While trying different Linux desktops, I noticed that many are designed for clean installations. When multiple desktops are installed on the same system, their configuration files mix together and break the intended experience. Many times I had to reinstall the entire system just to try another setup.
+
+I did not want to use virtual machines, and I wanted a cleaner and more realistic way to learn how others configure their desktops without affecting my main system.
+
+This project allows me to safely install and test different desktops, compare setups, experiment, and slowly build what will become my final configuration. This is only a hobby, but I hope that others find it useful too.
+
+---
+
+# License
+
+This project is released under the MIT License. See the LICENSE file for details.
