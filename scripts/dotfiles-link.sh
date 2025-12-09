@@ -187,57 +187,63 @@ main() {
   local cmd="${1:-}"
   case "$cmd" in
     prepare)
+      # dotfiles-link.sh prepare NAME
       if [[ -z "${2:-}" ]]; then
-        echo "Usage: $0 prepare <name>" >&2
+        echo "Usage: $0 prepare NAME" >&2
         exit 1
       fi
       prepare_dotfiles_structure "$2"
       ;;
     link-config)
+      # dotfiles-link.sh link-config NAME
       if [[ -z "${2:-}" ]]; then
-        echo "Usage: $0 link-config <name>" >&2
+        echo "Usage: $0 link-config NAME" >&2
         exit 1
       fi
       link_config_dir "$2"
       ;;
     adopt-config)
+      # dotfiles-link.sh adopt-config NAME
       if [[ -z "${2:-}" ]]; then
-        echo "Usage: $0 adopt-config <name>" >&2
+        echo "Usage: $0 adopt-config NAME" >&2
         exit 1
       fi
       adopt_config_dir "$2"
       ;;
     ""|help|-h|--help)
       cat <<EOF
-Usage: $0 <command> [args]
+Usage:
+  dotfiles-link.sh COMMAND [ARGS]
 
 Commands:
-  prepare <name>
+  prepare NAME
       Create dotfiles tree for a desktop under:
-        $DOTFILES_ROOT/<name>/.config
+        \$DOTFILES_ROOT/NAME/.config
       Does NOT touch the fake HOME.
 
-  link-config <name>
+  link-config NAME
       Create symlink:
-        ~/.<name>/.config -> $DOTFILES_ROOT/<name>/.config
-      Fails if ~/.<name>/.config already exists as a real directory/file.
+        ~/.NAME/.config -> \$DOTFILES_ROOT/NAME/.config
+      Fails if ~/.NAME/.config already exists as a real directory or file.
 
-  adopt-config <name>
+  adopt-config NAME
       Move existing configs from:
-        ~/.<name>/.config/*
+        ~/.NAME/.config/*
       into:
-        $DOTFILES_ROOT/<name>/.config/
-      and then replace ~/.<name>/.config with a symlink pointing there.
+        \$DOTFILES_ROOT/NAME/.config/
+      and then replace ~/.NAME/.config with a symlink pointing there.
       This is useful after you have installed a desktop and want to
       centralize its configs in the desktops/ tree for Git and editing.
 
-Environment:
-  CONFIG_BASE_PREFIX   Fake HOME prefix (default: "$HOME/.")
-  DOTFILES_ROOT        Base dir for per-desktop dotfiles (default: "$HOME/isolated-desktops/desktops")
+Environment variables:
+  CONFIG_BASE_PREFIX   Fake HOME prefix (default: "\$HOME/.")
+  DOTFILES_ROOT        Base dir for per-desktop dotfiles
+                       (default: "\$HOME/isolated-desktops/desktops")
 EOF
       ;;
     *)
       echo "Unknown command: $cmd" >&2
+      echo "Use: $0 help" >&2
       exit 1
       ;;
   esac
