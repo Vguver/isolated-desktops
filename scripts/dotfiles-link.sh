@@ -5,24 +5,24 @@
 #
 # Goals:
 #   - Keep each desktop's dotfiles under:
-#       $HOME/isolated-desktops/desktops/<name>/.config/...
-#   - Make the fake HOME (~/.<name>) use that tree via symlinks.
+#       $HOME/isolated-desktops/desktops/NAME/.config/...
+#   - Make the fake HOME (~/.NAME) use that tree via symlinks.
 #
 # Subcommands:
-#   prepare <name>
+#   prepare NAME
 #       Create dotfiles directory structure for a desktop.
 #
-#   link-config <name>
+#   link-config NAME
 #       Create symlink:
-#         ~/.<name>/.config -> ~/isolated-desktops/desktops/<name>/.config
-#       Only works if ~/.<name>/.config does not exist yet.
+#         ~/.NAME/.config -> ~/isolated-desktops/desktops/NAME/.config
+#       Only works if ~/.NAME/.config does not exist yet.
 #
-#   adopt-config <name>
+#   adopt-config NAME
 #       Move existing config files from:
-#         ~/.<name>/.config/*
+#         ~/.NAME/.config/*
 #       into:
-#         ~/isolated-desktops/desktops/<name>/.config/
-#       then replace ~/.<name>/.config with a symlink pointing there.
+#         ~/isolated-desktops/desktops/NAME/.config/
+#       then replace ~/.NAME/.config with a symlink pointing there.
 #       This is the "I already installed and like the result, now adopt it"
 #       workflow.
 
@@ -52,6 +52,7 @@ dotfiles_path_for() {
 prepare_dotfiles_structure() {
   local name="$1"
   local env_home dot_home
+
   env_home="$(env_path_for "$name")"
   dot_home="$(dotfiles_path_for "$name")"
 
@@ -74,6 +75,7 @@ prepare_dotfiles_structure() {
 link_config_dir() {
   local name="$1"
   local env_home dot_home
+
   env_home="$(env_path_for "$name")"
   dot_home="$(dotfiles_path_for "$name")"
 
@@ -101,12 +103,13 @@ link_config_dir() {
 }
 
 # -------------------------------------------------------------------
-# ADOPT-CONFIG: move existing ~/.<name>/.config into dotfiles tree
+# ADOPT-CONFIG: move existing ~/.NAME/.config into dotfiles tree
 # -------------------------------------------------------------------
 
 adopt_config_dir() {
   local name="$1"
   local env_home dot_home env_config dot_config
+
   env_home="$(env_path_for "$name")"
   dot_home="$(dotfiles_path_for "$name")"
   env_config="$env_home/.config"
@@ -185,6 +188,7 @@ adopt_config_dir() {
 
 main() {
   local cmd="${1:-}"
+
   case "$cmd" in
     prepare)
       # dotfiles-link.sh prepare NAME
