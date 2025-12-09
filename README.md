@@ -19,11 +19,11 @@ Each environment contains its own .config, .local, .cache, logs, and dotfiles.
 
 ## Complete desktop isolation
 
-Each desktop environment has its own fake HOME.
+Each desktop environment has its own fake HOME directory.
 
 ## Automatic installers
 
-The script `setup_desktops.sh` creates the fake HOME, clones the repo, runs the installer, and logs everything.
+The script setup_desktops.sh creates the fake HOME, clones the repo, runs the installer, and logs everything.
 
 ## Automatic launch scripts
 
@@ -33,14 +33,14 @@ Generated start scripts:
 
 ## Display manager integration
 
-Sessions created in:
+Creates sessions in:
 
     /usr/share/xsessions
     /usr/share/wayland-sessions
 
 ## Dotfiles support
 
-Each desktop has a dedicated directory:
+Dotfiles per desktop:
 
     ~/isolated-desktops/desktops/<name>/
 
@@ -70,7 +70,7 @@ Each desktop has a dedicated directory:
 
 # Installation
 
-## Clone and prepare the repository
+## Clone and prepare
 
     git clone https://github.com/Vguver/isolated-desktops.git
     cd isolated-desktops
@@ -86,7 +86,7 @@ Each desktop has a dedicated directory:
     EOF
     chmod +x ~/.local/bin/idtool
 
-## Run the tool
+## Run
 
     idtool
 
@@ -106,7 +106,7 @@ Each desktop has a dedicated directory:
 
 # Installer logs
 
-Logs stored in:
+Logs located in:
 
     ~/.<name>/logs/
 
@@ -118,7 +118,7 @@ Example:
 
 # Dotfiles organization
 
-Dotfiles directory:
+Locations:
 
     ~/isolated-desktops/desktops/<name>/
 
@@ -131,13 +131,13 @@ Link dotfiles using:
 
 # Developer tools
 
-## Open environments in VS Code or VSCodium
+## VS Code / VSCodium
 
     ./scripts/dev-open.sh real-home
     ./scripts/dev-open.sh fake-home omarchy
     ./scripts/dev-open.sh dotfiles jakoolit
 
-## Snapshot dotfiles to GitHub or GitLab
+## Git snapshots
 
     ./scripts/dev-sync.sh snapshot omarchy git@github.com:User/omarchy-config.git main
 
