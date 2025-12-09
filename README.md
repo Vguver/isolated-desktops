@@ -11,7 +11,7 @@ This project allows you to install and run multiple DE and WM setups such as Oma
     ~/.dwm-titus/
     ~/.ml4w-starter/
 
-Each environment contains its own `.config`, `.local`, `.cache`, logs, and dotfiles.
+Each environment contains its own .config, .local, .cache, logs, and dotfiles.
 
 ---
 
@@ -21,24 +21,28 @@ Each environment contains its own `.config`, `.local`, `.cache`, logs, and dotfi
 Each desktop environment has its own fake HOME directory that does not affect the others.
 
 ## Automatic installers
-`setup_desktops.sh` creates the fake HOME, clones the repository, runs the installer, and logs everything.
+setup_desktops.sh creates the fake HOME, clones the repository, runs the installer, and logs everything.
 
 ## Automatic launch scripts
-`desktop-launch.sh` generates start commands such as:
+desktop-launch.sh generates start commands such as:
 
     /usr/local/bin/start-<name>.sh
 
 ## Display manager integration
-`desktop-sessions.sh` creates sessions in:
+desktop-sessions.sh creates session entries in:
 
     /usr/share/xsessions
     /usr/share/wayland-sessions
 
 ## Dotfiles support
-
 Each desktop has its own dotfiles directory:
 
     ~/isolated-desktops/desktops/<name>/
+
+## Developer tools
+- Open real or fake HOME in VS Code or VSCodium  
+- Open dotfiles directly  
+- Snapshot dotfiles to GitHub or GitLab  
 
 ---
 
@@ -60,21 +64,20 @@ Each desktop has its own dotfiles directory:
 
 # Installation
 
-## Clone and prepare
+## Clone and prepare the repository
 
     git clone https://github.com/Vguver/isolated-desktops.git
     cd isolated-desktops
     chmod +x install.sh
     chmod +x scripts/*.sh
 
-## Install idtool wrapper
+## Install the idtool wrapper
 
     mkdir -p ~/.local/bin
     cat > ~/.local/bin/idtool << 'EOF'
     #!/usr/bin/env bash
     "$HOME/isolated-desktops/install.sh" "$@"
     EOF
-
     chmod +x ~/.local/bin/idtool
 
 ## Run the tool
@@ -109,11 +112,11 @@ Example:
 
 # Dotfiles organization
 
-Dotfiles directory per desktop:
+Each desktop has its own dotfiles directory:
 
     ~/isolated-desktops/desktops/<name>/
 
-Link dotfiles with:
+Link dotfiles using:
 
     ./scripts/dotfiles-link.sh prepare <name>
     ./scripts/dotfiles-link.sh link-config <name>
@@ -144,7 +147,7 @@ Optional:
 
 - pacman  
 - VS Code or VSCodium  
-- A display manager (SDDM, LightDM, GDM)  
+- A display manager such as SDDM, LightDM, or GDM  
 
 ---
 
