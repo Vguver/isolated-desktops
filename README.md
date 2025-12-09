@@ -4,6 +4,8 @@ A modular system for installing, isolating, and managing multiple Linux desktop 
 
 This project allows you to install and run multiple DE and WM setups such as Omarchy, JaKooLit Hyprland, DWM-Titus, ML4W, and others without mixing configurations.
 
+---
+
 ## Example fake HOME folders
 
     ~/.omarchy/
@@ -17,30 +19,30 @@ Each environment contains its own .config, .local, .cache, logs, and dotfiles.
 
 # Features
 
-## Complete desktop isolation
-Each desktop environment has its own fake HOME directory that does not affect the others.
+## Complete desktop isolation  
+Each desktop environment has its own fake HOME.
 
-## Automatic installers
-setup_desktops.sh creates the fake HOME, clones the repository, runs the installer, and logs everything.
+## Automatic installers  
+`setup_desktops.sh` creates the fake HOME, clones the repo, runs the installer, and logs everything.
 
-## Automatic launch scripts
-desktop-launch.sh generates start commands such as:
+## Automatic launch scripts  
+Generated start scripts:
 
     /usr/local/bin/start-<name>.sh
 
-## Display manager integration
-desktop-sessions.sh creates session entries in:
+## Display manager integration  
+Sessions created in:
 
-    /usr/share/xsessions
-    /usr/share/wayland-sessions
+    /usr/share/xsessions  
+    /usr/share/wayland-sessions  
 
-## Dotfiles support
-Each desktop has its own dotfiles directory:
+## Dotfiles support  
+Each desktop has a dedicated directory:
 
     ~/isolated-desktops/desktops/<name>/
 
-## Developer tools
-- Open real or fake HOME in VS Code or VSCodium  
+## Developer tools  
+- Open environments in VS Code or VSCodium  
 - Open dotfiles directly  
 - Snapshot dotfiles to GitHub or GitLab  
 
@@ -64,14 +66,14 @@ Each desktop has its own dotfiles directory:
 
 # Installation
 
-## Clone and prepare the repository
+Clone and prepare:
 
     git clone https://github.com/Vguver/isolated-desktops.git
     cd isolated-desktops
     chmod +x install.sh
     chmod +x scripts/*.sh
 
-## Install the idtool wrapper
+Install the idtool wrapper:
 
     mkdir -p ~/.local/bin
     cat > ~/.local/bin/idtool << 'EOF'
@@ -80,7 +82,7 @@ Each desktop has its own dotfiles directory:
     EOF
     chmod +x ~/.local/bin/idtool
 
-## Run the tool
+Run the tool:
 
     idtool
 
@@ -100,7 +102,7 @@ Each desktop has its own dotfiles directory:
 
 # Installer logs
 
-Logs for each environment are stored in:
+Logs stored in:
 
     ~/.<name>/logs/
 
@@ -112,11 +114,11 @@ Example:
 
 # Dotfiles organization
 
-Each desktop has its own dotfiles directory:
+Dotfiles directory:
 
     ~/isolated-desktops/desktops/<name>/
 
-Link dotfiles using:
+Link dotfiles:
 
     ./scripts/dotfiles-link.sh prepare <name>
     ./scripts/dotfiles-link.sh link-config <name>
@@ -125,13 +127,13 @@ Link dotfiles using:
 
 # Developer tools
 
-## Open environments in VS Code or VSCodium
+VS Code / VSCodium:
 
     ./scripts/dev-open.sh real-home
     ./scripts/dev-open.sh fake-home omarchy
     ./scripts/dev-open.sh dotfiles jakoolit
 
-## Snapshot dotfiles to GitHub or GitLab
+Snapshot to GitHub or GitLab:
 
     ./scripts/dev-sync.sh snapshot omarchy git@github.com:User/omarchy-config.git main
 
@@ -147,7 +149,7 @@ Optional:
 
 - pacman  
 - VS Code or VSCodium  
-- A display manager such as SDDM, LightDM, or GDM  
+- Display manager (SDDM, LightDM, GDM)  
 
 ---
 
