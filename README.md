@@ -4,8 +4,6 @@ A modular system for installing, isolating, and managing multiple Linux desktop 
 
 This project allows you to install and run multiple DE and WM setups such as Omarchy, JaKooLit Hyprland, DWM-Titus, ML4W, and others without mixing configurations.
 
----
-
 ## Example fake HOME folders
 
     ~/.omarchy/
@@ -19,32 +17,38 @@ Each environment contains its own .config, .local, .cache, logs, and dotfiles.
 
 # Features
 
-## Complete desktop isolation  
+## Complete desktop isolation
+
 Each desktop environment has its own fake HOME.
 
-## Automatic installers  
-`setup_desktops.sh` creates the fake HOME, clones the repo, runs the installer, and logs everything.
+## Automatic installers
 
-## Automatic launch scripts  
+The script `setup_desktops.sh` creates the fake HOME, clones the repo, runs the installer, and logs everything.
+
+## Automatic launch scripts
+
 Generated start scripts:
 
     /usr/local/bin/start-<name>.sh
 
-## Display manager integration  
+## Display manager integration
+
 Sessions created in:
 
-    /usr/share/xsessions  
-    /usr/share/wayland-sessions  
+    /usr/share/xsessions
+    /usr/share/wayland-sessions
 
-## Dotfiles support  
+## Dotfiles support
+
 Each desktop has a dedicated directory:
 
     ~/isolated-desktops/desktops/<name>/
 
-## Developer tools  
-- Open environments in VS Code or VSCodium  
-- Open dotfiles directly  
-- Snapshot dotfiles to GitHub or GitLab  
+## Developer tools
+
+- Open real or fake HOME in VS Code or VSCodium
+- Open desktop-specific dotfiles
+- Snapshot dotfiles to GitHub or GitLab
 
 ---
 
@@ -66,14 +70,14 @@ Each desktop has a dedicated directory:
 
 # Installation
 
-Clone and prepare:
+## Clone and prepare the repository
 
     git clone https://github.com/Vguver/isolated-desktops.git
     cd isolated-desktops
     chmod +x install.sh
     chmod +x scripts/*.sh
 
-Install the idtool wrapper:
+## Install the idtool wrapper
 
     mkdir -p ~/.local/bin
     cat > ~/.local/bin/idtool << 'EOF'
@@ -82,7 +86,7 @@ Install the idtool wrapper:
     EOF
     chmod +x ~/.local/bin/idtool
 
-Run the tool:
+## Run the tool
 
     idtool
 
@@ -118,7 +122,7 @@ Dotfiles directory:
 
     ~/isolated-desktops/desktops/<name>/
 
-Link dotfiles:
+Link dotfiles using:
 
     ./scripts/dotfiles-link.sh prepare <name>
     ./scripts/dotfiles-link.sh link-config <name>
@@ -127,13 +131,13 @@ Link dotfiles:
 
 # Developer tools
 
-VS Code / VSCodium:
+## Open environments in VS Code or VSCodium
 
     ./scripts/dev-open.sh real-home
     ./scripts/dev-open.sh fake-home omarchy
     ./scripts/dev-open.sh dotfiles jakoolit
 
-Snapshot to GitHub or GitLab:
+## Snapshot dotfiles to GitHub or GitLab
 
     ./scripts/dev-sync.sh snapshot omarchy git@github.com:User/omarchy-config.git main
 
@@ -141,15 +145,15 @@ Snapshot to GitHub or GitLab:
 
 # Requirements
 
-- bash  
-- git  
-- curl  
+- bash
+- git
+- curl
 
 Optional:
 
-- pacman  
-- VS Code or VSCodium  
-- Display manager (SDDM, LightDM, GDM)  
+- pacman
+- VS Code or VSCodium
+- Display manager (SDDM, LightDM, GDM)
 
 ---
 
