@@ -8,246 +8,553 @@
 #       $HOME/isolated-desktops/desktops/NAME/.config/...
 #   - Make the fake HOME (~/.NAME) use that tree via symlinks.
 #
-# Subcommands:
-#   prepare NAME
-#       Create dotfiles directory structure for a desktop.
-#
-#   link-config NAME
-#       Create symlink:
-#         ~/.NAME/.config -> ~/isolated-desktops/desktops/NAME/.config
-#       Only works if ~/.NAME/.config does not exist yet.
-#
-#   adopt-config NAME
-#       Move existing config files from:
-#         ~/.NAME/.config/*
-#       into:
-#         ~/isolated-desktops/desktops/NAME/.config/
-#       then replace ~/.NAME/.config with a symlink pointing there.
-#       This is the "I already installed and like the result, now adopt it"
-#       workflow.
+# Version: 2.0
+# Author: Vguver
+# License: MIT
 
 set -euo pipefail
 
+# -------------------------------------------------------------------
+# CONFIGURATION
+# -------------------------------------------------------------------
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Source repos module
+if [[ ! -f "$SCRIPT_DIR/repos-desktops.sh" ]]; then
+  echo "Error: Required file not found: $SCRIPT_DIR/repos-desktops.sh" >&2
+  exit 1
+fi
+
 # shellcheck source=/dev/null
 source "$SCRIPT_DIR/repos-desktops.sh"
 
 CONFIG_BASE_PREFIX="${CONFIG_BASE_PREFIX:-"$HOME/."}"
 DOTFILES_ROOT="${DOTFILES_ROOT:-"$HOME/isolated-desktops/desktops"}"
 
+# -------------------------------------------------------------------
+# HELPER FUNCTIONS
+# -------------------------------------------------------------------
+
+# Get fake HOME path
 env_path_for() {
   local name="$1"
   printf '%s%s\n' "$CONFIG_BASE_PREFIX" "$name"
 }
 
+# Get dotfiles path
 dotfiles_path_for() {
   local name="$1"
   printf '%s/%s\n' "$DOTFILES_ROOT" "$name"
 }
 
+# Validate desktop name
+validate_desktop_name() {
+  local name="$1"
+  
+  if [[ -z "$name" ]]; then
+    echo "Error: Desktop name cannot be empty" >&2
+    return 1
+  fi
+  
+  if [[ ! "$name" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+    echo "Error: Invalid desktop name: $name" >&2
+    return 1
+  fi
+  
+  return 0
+}
+
+# Check if directory is empty
+is_directory_empty() {
+  local dir="$1"
+  
+  if [[ ! -d "$dir" ]]; then
+    return 0  # Consider non-existent as empty
+  fi
+  
+  # Check if directory has any files (including hidden)
+  shopt -s nullglob dotglob
+  local files=("$dir"/*)
+  shopt -u nullglob dotglob
+  
+  [[ ${#files[@]} -eq 0 ]]
+}
+
+# Safe directory move with error handling
+safe_move_contents() {
+  local src="$1"
+  local dst="$2"
+  
+  if [[ ! -d "$src" ]]; then
+    echo "Error: Source directory does not exist: $src" >&2
+    return 1
+  fi
+  
+  if [[ ! -d "$dst" ]]; then
+    if ! mkdir -p "$dst"; then
+      echo "Error: Failed to create destination: $dst" >&2
+      return 1
+    fi
+  fi
+  
+  # Move all contents (including hidden files)
+  shopt -s dotglob nullglob
+  local files=("$src"/*)
+  shopt -u dotglob nullglob
+  
+  if [[ ${#files[@]} -eq 0 ]]; then
+    return 0  # Nothing to move
+  fi
+  
+  for item in "${files[@]}"; do
+    if ! mv "$item" "$dst/" 2>/dev/null; then
+      echo "Error: Failed to move: $item" >&2
+      return 1
+    fi
+  done
+  
+  return 0
+}
+
 # -------------------------------------------------------------------
-# PREPARE: create dotfiles directory structure
+# PREPARE: Create dotfiles directory structure
 # -------------------------------------------------------------------
 
 prepare_dotfiles_structure() {
   local name="$1"
+  
+  if ! validate_desktop_name "$name"; then
+    return 1
+  fi
+  
   local env_home dot_home
-
   env_home="$(env_path_for "$name")"
   dot_home="$(dotfiles_path_for "$name")"
+  
+  echo ">>> Preparing dotfiles structure for: $name"
+  echo ""
+  
+  # Create dotfiles directories
+  if ! mkdir -p "$dot_home/.config" "$dot_home/.local/share" "$dot_home/.local/bin" 2>/dev/null; then
+    echo "Error: Failed to create dotfiles directories" >&2
+    return 1
+  fi
+  
+  cat <<EOF
+Created dotfiles structure:
+  Root      : $dot_home
+  Config    : $dot_home/.config
+  Data      : $dot_home/.local/share
+  Binaries  : $dot_home/.local/bin
 
-  mkdir -p "$dot_home"
-  mkdir -p "$dot_home/.config" "$dot_home/.local/share"
+Fake HOME:
+  Path      : $env_home
 
-  echo "Dotfiles root for '$name': $dot_home"
-  echo "Fake HOME for '$name'   : $env_home"
-  echo
-  echo "You can now move or copy configs into:"
-  echo "  $dot_home/.config/"
-  echo "and later link it into the fake HOME using:"
-  echo "  dotfiles-link.sh link-config $name"
+Next steps:
+  1. Place your dotfiles in: $dot_home/.config/
+  2. Link to fake HOME: $0 link-config $name
+  3. Or adopt existing: $0 adopt-config $name
+
+EOF
+  
+  return 0
 }
 
 # -------------------------------------------------------------------
-# LINK-CONFIG: link fake HOME .config -> dotfiles .config
+# LINK-CONFIG: Link fake HOME .config -> dotfiles .config
 # -------------------------------------------------------------------
 
 link_config_dir() {
   local name="$1"
-  local env_home dot_home
-
+  
+  if ! validate_desktop_name "$name"; then
+    return 1
+  fi
+  
+  local env_home dot_home target link
   env_home="$(env_path_for "$name")"
   dot_home="$(dotfiles_path_for "$name")"
-
-  local target="$dot_home/.config"
-  local link="$env_home/.config"
-
-  mkdir -p "$dot_home"
-  mkdir -p "$target"
-  mkdir -p "$env_home"
-
+  target="$dot_home/.config"
+  link="$env_home/.config"
+  
+  echo ">>> Linking config directory for: $name"
+  echo ""
+  
+  # Ensure fake HOME exists
+  if [[ ! -d "$env_home" ]]; then
+    echo "Error: Fake HOME does not exist: $env_home" >&2
+    echo "       Create it first: setup_desktops.sh create $name" >&2
+    return 1
+  fi
+  
+  # Ensure dotfiles structure exists
+  if ! mkdir -p "$dot_home" "$target" 2>/dev/null; then
+    echo "Error: Failed to create dotfiles directory: $dot_home" >&2
+    return 1
+  fi
+  
+  # Check if link already exists
   if [[ -L "$link" ]]; then
-    echo "Warning: $link is already a symlink. Not overwriting." >&2
+    local current_target
+    current_target="$(readlink "$link")"
+    
+    if [[ "$current_target" == "$target" ]]; then
+      echo "✓ Link already exists and points to correct target"
+      echo "  Link:   $link"
+      echo "  Target: $target"
+      return 0
+    else
+      echo "Warning: Link exists but points to different target" >&2
+      echo "         Current: $current_target" >&2
+      echo "         Expected: $target" >&2
+      read -r -p "Update link? [y/N]: " ans
+      if [[ ! "$ans" =~ ^[Yy]$ ]]; then
+        echo "Aborted by user"
+        return 1
+      fi
+      rm -f "$link"
+    fi
+  fi
+  
+  # Check if regular directory/file exists
+  if [[ -e "$link" ]]; then
+    echo "Error: Path exists as regular directory/file: $link" >&2
+    echo "       Use 'adopt-config' to move existing configs to dotfiles" >&2
+    echo "       Or remove manually before linking" >&2
     return 1
   fi
-
-  if [[ -d "$link" || -f "$link" ]]; then
-    echo "Error: $link already exists as a regular directory/file." >&2
-    echo "Use 'adopt-config $name' if you want to move its contents into the dotfiles directory," >&2
-    echo "or handle it manually before linking." >&2
+  
+  # Create symlink
+  if ! ln -s "$target" "$link" 2>/dev/null; then
+    echo "Error: Failed to create symlink" >&2
     return 1
   fi
-
-  ln -s "$target" "$link"
-  echo "Linked: $link -> $target"
+  
+  echo "✓ Successfully linked config directory"
+  echo "  Link:   $link"
+  echo "  Target: $target"
+  echo ""
+  
+  return 0
 }
 
 # -------------------------------------------------------------------
-# ADOPT-CONFIG: move existing ~/.NAME/.config into dotfiles tree
+# ADOPT-CONFIG: Move existing ~/.NAME/.config into dotfiles tree
 # -------------------------------------------------------------------
 
 adopt_config_dir() {
   local name="$1"
+  
+  if ! validate_desktop_name "$name"; then
+    return 1
+  fi
+  
   local env_home dot_home env_config dot_config
-
   env_home="$(env_path_for "$name")"
   dot_home="$(dotfiles_path_for "$name")"
   env_config="$env_home/.config"
   dot_config="$dot_home/.config"
-
+  
+  echo ">>> Adopting existing config for: $name"
+  echo ""
+  
+  # Validate fake HOME exists
   if [[ ! -d "$env_home" ]]; then
-    echo "Error: fake HOME does not exist: $env_home" >&2
-    echo "Install the desktop first using setup_desktops.sh create $name." >&2
+    echo "Error: Fake HOME does not exist: $env_home" >&2
+    echo "       Install the desktop first: setup_desktops.sh create $name" >&2
     return 1
   fi
-
+  
+  # Check if config exists and is a directory
   if [[ ! -d "$env_config" ]]; then
-    echo "Error: $env_config does not exist or is not a directory." >&2
-    echo "Nothing to adopt. If you want to start fresh, use 'prepare' + 'link-config' instead." >&2
+    if [[ -L "$env_config" ]]; then
+      echo "Error: $env_config is already a symlink" >&2
+      local target
+      target="$(readlink "$env_config")"
+      echo "       Points to: $target" >&2
+      echo "       Nothing to adopt" >&2
+    else
+      echo "Error: $env_config does not exist or is not a directory" >&2
+      echo "       Nothing to adopt" >&2
+    fi
     return 1
   fi
-
-  mkdir -p "$dot_config"
-
-  # Check if dot_config is empty to avoid merging two sets of configs silently
-  if [[ -n "$(find "$dot_config" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]]; then
-    echo "Warning: $dot_config is not empty." >&2
-    echo "For safety, adopt-config will NOT merge configs automatically." >&2
-    echo "Please move or clean its contents manually, then run adopt-config again." >&2
-    echo
-    echo "Dotfiles directory:" >&2
-    echo "  $dot_config" >&2
+  
+  # Check if env_config is empty
+  if is_directory_empty "$env_config"; then
+    echo "Warning: $env_config is empty" >&2
+    echo "         Nothing to adopt" >&2
     return 1
   fi
-
-  echo "This will:"
-  echo "  1) Move all files from:"
-  echo "       $env_config"
-  echo "     into:"
-  echo "       $dot_config"
-  echo "  2) Remove the original directory (if empty)"
-  echo "  3) Create a symlink:"
-  echo "       $env_config -> $dot_config"
-  echo
-  read -r -p "Continue with adopt-config for '$name'? [y/N]: " ans
-  if [[ ! "$ans" =~ ^[Yy]$ ]]; then
-    echo "Aborted by user."
+  
+  # Create dotfiles directory
+  if ! mkdir -p "$dot_config" 2>/dev/null; then
+    echo "Error: Failed to create dotfiles directory: $dot_config" >&2
     return 1
   fi
+  
+  # Check if dot_config already has content
+  if ! is_directory_empty "$dot_config"; then
+    echo "Error: Dotfiles directory is not empty: $dot_config" >&2
+    echo "       This could cause conflicts" >&2
+    echo "       Please clean it manually first" >&2
+    return 1
+  fi
+  
+  # Show plan
+  cat <<EOF
+Adoption plan:
+  1. Move contents from: $env_config
+     to:                 $dot_config
+  2. Remove original:    $env_config
+  3. Create symlink:     $env_config -> $dot_config
 
-  # Move contents of env_config into dot_config
+EOF
+  
+  # Count files to be moved
   shopt -s dotglob nullglob
-  if mv "$env_config"/* "$dot_config"/ 2>/dev/null; then
-    :
-  fi
+  local files=("$env_config"/*)
   shopt -u dotglob nullglob
-
-  # Try to remove the original env_config directory
-  if rmdir "$env_config" 2>/dev/null; then
-    :
-  else
-    echo "Warning: could not remove $env_config (directory not empty?)." >&2
-    echo "Check its contents manually if needed." >&2
-  fi
-
-  # If env_config still exists, do not overwrite it
-  if [[ -e "$env_config" || -L "$env_config" ]]; then
-    echo "Warning: $env_config still exists after move; not overwriting with symlink." >&2
-    echo "Please verify manually that it points to $dot_config if you create it." >&2
+  echo "Files/directories to move: ${#files[@]}"
+  echo ""
+  
+  # Confirm
+  read -r -p "Continue with adoption? [y/N]: " ans
+  if [[ ! "$ans" =~ ^[Yy]$ ]]; then
+    echo "Aborted by user"
     return 1
   fi
-
-  ln -s "$dot_config" "$env_config"
-  echo "Adopted config for '$name' and created symlink:"
-  echo "  $env_config -> $dot_config"
+  
+  echo ""
+  echo "Processing..."
+  
+  # Move contents
+  if ! safe_move_contents "$env_config" "$dot_config"; then
+    echo "" >&2
+    echo "Error: Failed to move config contents" >&2
+    echo "       Partial move may have occurred" >&2
+    echo "       Check directories manually:" >&2
+    echo "         Source: $env_config" >&2
+    echo "         Dest:   $dot_config" >&2
+    return 1
+  fi
+  
+  # Try to remove original directory
+  if ! rmdir "$env_config" 2>/dev/null; then
+    echo "Warning: Could not remove original directory (not empty?)" >&2
+    echo "         Path: $env_config" >&2
+    echo "         Check manually and remove if safe" >&2
+  fi
+  
+  # Verify original is gone or is symlink
+  if [[ -d "$env_config" && ! -L "$env_config" ]]; then
+    echo "Error: Original directory still exists after move" >&2
+    echo "       Cannot create symlink" >&2
+    echo "       Check manually: $env_config" >&2
+    return 1
+  fi
+  
+  # Remove if it's already a symlink (shouldn't happen but be safe)
+  if [[ -L "$env_config" ]]; then
+    rm -f "$env_config"
+  fi
+  
+  # Create symlink
+  if ! ln -s "$dot_config" "$env_config" 2>/dev/null; then
+    echo "Error: Failed to create symlink" >&2
+    echo "       Your configs are safe at: $dot_config" >&2
+    echo "       You can create symlink manually:" >&2
+    echo "         ln -s $dot_config $env_config" >&2
+    return 1
+  fi
+  
+  echo ""
+  echo "✓ Successfully adopted config for: $name"
+  echo "  Original:  (moved)"
+  echo "  Dotfiles:  $dot_config"
+  echo "  Symlink:   $env_config -> $dot_config"
+  echo ""
+  echo "Your configs are now managed in the dotfiles tree"
+  echo "You can version them with Git using dev-sync.sh"
+  echo ""
+  
+  return 0
 }
 
 # -------------------------------------------------------------------
-# CLI
+# STATUS: Show linking status
 # -------------------------------------------------------------------
+
+show_status() {
+  local name="${1:-}"
+  
+  if [[ -z "$name" ]]; then
+    # Show all desktops
+    echo "Dotfiles status for all desktops:"
+    echo ""
+    printf "  %-20s %-15s %s\n" "DESKTOP" "CONFIG STATUS" "PATH"
+    printf "  %-20s %-15s %s\n" "-------" "-------------" "----"
+    
+    for name in $(repos_list_names); do
+      local env_config status
+      env_config="$(env_path_for "$name")/.config"
+      
+      if [[ -L "$env_config" ]]; then
+        status="✓ Linked"
+      elif [[ -d "$env_config" ]]; then
+        status="✗ Not linked"
+      else
+        status="- Missing"
+      fi
+      
+      printf "  %-20s %-15s %s\n" "$name" "$status" "$env_config"
+    done
+    echo ""
+  else
+    # Show specific desktop
+    if ! validate_desktop_name "$name"; then
+      return 1
+    fi
+    
+    local env_home dot_home env_config dot_config
+    env_home="$(env_path_for "$name")"
+    dot_home="$(dotfiles_path_for "$name")"
+    env_config="$env_home/.config"
+    dot_config="$dot_home/.config"
+    
+    echo "Status for: $name"
+    echo ""
+    echo "Fake HOME:"
+    if [[ -d "$env_home" ]]; then
+      echo "  ✓ Exists: $env_home"
+    else
+      echo "  ✗ Missing: $env_home"
+    fi
+    echo ""
+    
+    echo "Dotfiles:"
+    if [[ -d "$dot_home" ]]; then
+      echo "  ✓ Exists: $dot_home"
+    else
+      echo "  ✗ Missing: $dot_home"
+    fi
+    echo ""
+    
+    echo "Config directory:"
+    if [[ -L "$env_config" ]]; then
+      local target
+      target="$(readlink "$env_config")"
+      echo "  ✓ Linked: $env_config"
+      echo "    Target: $target"
+      if [[ "$target" == "$dot_config" ]]; then
+        echo "    Status: Correct"
+      else
+        echo "    Status: Points to wrong target"
+      fi
+    elif [[ -d "$env_config" ]]; then
+      echo "  ✗ Not linked (regular directory): $env_config"
+    else
+      echo "  - Missing: $env_config"
+    fi
+    echo ""
+  fi
+}
+
+# -------------------------------------------------------------------
+# CLI INTERFACE
+# -------------------------------------------------------------------
+
+show_help() {
+  cat <<EOF
+Usage: $0 <command> [args]
+
+COMMANDS:
+  prepare <n>          Create dotfiles structure
+  link-config <n>      Link fake HOME config to dotfiles
+  adopt-config <n>     Move existing config to dotfiles and link
+  status [name]           Show linking status
+  help                    Show this help message
+
+WORKFLOWS:
+
+  New installation (before installing):
+    1. $0 prepare omarchy
+    2. setup_desktops.sh create omarchy
+    3. $0 adopt-config omarchy
+
+  Existing installation (after installing):
+    1. setup_desktops.sh create omarchy
+    2. $0 adopt-config omarchy
+
+  Manual dotfiles setup:
+    1. $0 prepare omarchy
+    2. # Copy dotfiles to ~/isolated-desktops/desktops/omarchy/.config/
+    3. $0 link-config omarchy
+
+EXAMPLES:
+  $0 prepare omarchy
+  $0 link-config jakoolit
+  $0 adopt-config dwm-titus
+  $0 status
+  $0 status omarchy
+
+ENVIRONMENT:
+  CONFIG_BASE_PREFIX      Fake HOME prefix
+                          (default: \$HOME/.)
+  DOTFILES_ROOT           Dotfiles base directory
+                          (default: \$HOME/isolated-desktops/desktops)
+
+STRUCTURE:
+  Fake HOME:    ~/.<n>/.config/
+  Dotfiles:     ~/isolated-desktops/desktops/<n>/.config/
+  Symlink:      ~/.<n>/.config -> ~/isolated-desktops/desktops/<n>/.config
+
+EOF
+}
 
 main() {
   local cmd="${1:-}"
-
+  
   case "$cmd" in
     prepare)
-      # dotfiles-link.sh prepare NAME
       if [[ -z "${2:-}" ]]; then
-        echo "Usage: $0 prepare NAME" >&2
+        echo "Error: Desktop name required" >&2
+        echo "Usage: $0 prepare <n>" >&2
         exit 1
       fi
       prepare_dotfiles_structure "$2"
       ;;
+      
     link-config)
-      # dotfiles-link.sh link-config NAME
       if [[ -z "${2:-}" ]]; then
-        echo "Usage: $0 link-config NAME" >&2
+        echo "Error: Desktop name required" >&2
+        echo "Usage: $0 link-config <n>" >&2
         exit 1
       fi
       link_config_dir "$2"
       ;;
+      
     adopt-config)
-      # dotfiles-link.sh adopt-config NAME
       if [[ -z "${2:-}" ]]; then
-        echo "Usage: $0 adopt-config NAME" >&2
+        echo "Error: Desktop name required" >&2
+        echo "Usage: $0 adopt-config <n>" >&2
         exit 1
       fi
       adopt_config_dir "$2"
       ;;
-    ""|help|-h|--help)
-      cat <<EOF
-Usage:
-  dotfiles-link.sh COMMAND [ARGS]
-
-Commands:
-  prepare NAME
-      Create dotfiles tree for a desktop under:
-        \$DOTFILES_ROOT/NAME/.config
-      Does NOT touch the fake HOME.
-
-  link-config NAME
-      Create symlink:
-        ~/.NAME/.config -> \$DOTFILES_ROOT/NAME/.config
-      Fails if ~/.NAME/.config already exists as a real directory or file.
-
-  adopt-config NAME
-      Move existing configs from:
-        ~/.NAME/.config/*
-      into:
-        \$DOTFILES_ROOT/NAME/.config/
-      and then replace ~/.NAME/.config with a symlink pointing there.
-      This is useful after you have installed a desktop and want to
-      centralize its configs in the desktops/ tree for Git and editing.
-
-Environment variables:
-  CONFIG_BASE_PREFIX   Fake HOME prefix (default: "\$HOME/.")
-  DOTFILES_ROOT        Base dir for per-desktop dotfiles
-                       (default: "\$HOME/isolated-desktops/desktops")
-EOF
+      
+    status)
+      show_status "${2:-}"
       ;;
+      
+    ""|help|-h|--help)
+      show_help
+      ;;
+      
     *)
-      echo "Unknown command: $cmd" >&2
-      echo "Use: $0 help" >&2
+      echo "Error: Unknown command: $cmd" >&2
+      echo "Use '$0 help' for usage information" >&2
       exit 1
       ;;
   esac
