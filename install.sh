@@ -11,7 +11,7 @@
 #   curl -fsSL https://raw.githubusercontent.com/Vguver/isolated-desktops/main/install.sh | bash
 #   ./install.sh
 #
-# Version: 2.4
+# Version: 1.0
 # Author: Vguver
 # License: MIT
 
