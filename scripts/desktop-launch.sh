@@ -5,7 +5,7 @@
 # Each script sets HOME and XDG_* to the fake environment and then execs the
 # desktop/WM command.
 #
-# Version: 2.0
+# Version: 1.0
 # Author: Vguver
 # License: MIT
 
