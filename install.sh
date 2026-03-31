@@ -28,7 +28,7 @@ REPO_URL="https://github.com/${GITHUB_USER}/${GITHUB_REPO}.git"
 DEFAULT_INSTALL_DIR="${INSTALL_DIR:-"$HOME/isolated-desktops"}"
 
 PROJECT_NAME="Isolated Desktops"
-PROJECT_VERSION="2.4"
+PROJECT_VERSION="1.0"
 PROJECT_URL="https://github.com/Vguver/isolated-desktops"
 
 BOOTSTRAP_MODE=0
