@@ -5,7 +5,7 @@
 # Uses fake HOME dirs like ~/.omarchy so each WM/DE keeps its own .config/.
 # Also generates detailed logs per desktop.
 #
-# Version: 2.0
+# Version: 1.0
 # Author: Vguver
 # License: MIT
 
