@@ -5,7 +5,7 @@
 # /usr/local/bin/start-<n>.sh.
 # Writes to /usr/share/xsessions and /usr/share/wayland-sessions (requires sudo).
 #
-# Version: 2.0
+# Version: 1.0
 # Author: Vguver
 # License: MIT
 
