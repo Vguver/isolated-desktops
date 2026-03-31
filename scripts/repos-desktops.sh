@@ -4,7 +4,7 @@
 # Module to manage desktop/WM repositories used by the isolated desktops system.
 # Provides functions to list, add, and query repos.
 #
-# Version: 2.0
+# Version: 1.0
 # Author: Vguver
 # License: MIT
 
