@@ -1,0 +1,31 @@
+{
+  "name": "ml4w-dotfiles",
+  "display_name": "ML4W Dotfiles",
+  "repo_url": "https://github.com/mylinuxforwork/dotfiles.git",
+  "ref": "2.12.1",
+  "adapter": "ml4w-dotfiles",
+  "session_type": "wayland",
+  "default_mode": "full",
+  "supported_modes": [
+    "full",
+    "config-only"
+  ],
+  "start_command": "dbus-run-session Hyprland",
+  "risk": "medium",
+  "summary": "Advanced Hyprland dotfiles with setup metadata.",
+  "host_changes": [
+    "possible package setup depending on upstream setup scripts",
+    "dotfiles restored into the profile home"
+  ],
+  "profile_changes": [
+    ".config",
+    ".local/share",
+    ".cache",
+    ".local/state",
+    ".gtkrc-2.0"
+  ],
+  "notes": [
+    "config-only mode copies repo/dotfiles into the profile home.",
+    "full mode runs setup/setup.sh from the repo root."
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "name": "ml4w-starter",
+  "display_name": "ML4W Hyprland Starter",
+  "repo_url": "https://github.com/mylinuxforwork/hyprland-starter.git",
+  "ref": "main",
+  "adapter": "ml4w-starter",
+  "session_type": "wayland",
+  "default_mode": "full",
+  "supported_modes": [
+    "full",
+    "config-only"
+  ],
+  "start_command": "dbus-run-session Hyprland",
+  "risk": "medium",
+  "summary": "Starter profile for Hyprland experiments.",
+  "host_changes": [
+    "possible package setup depending on upstream setup scripts",
+    "dotfiles and setup scripts copied into the profile home"
+  ],
+  "profile_changes": [
+    ".config",
+    ".local/share",
+    ".cache",
+    ".local/state"
+  ],
+  "notes": [
+    "Reads the dotinst metadata model and uses setup/setup.sh for full mode.",
+    "config-only mode copies the dotfiles subfolder into the profile home."
+  ]
+}

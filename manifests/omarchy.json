@@ -1,0 +1,30 @@
+{
+  "name": "omarchy",
+  "display_name": "Omarchy",
+  "repo_url": "https://github.com/basecamp/omarchy.git",
+  "ref": "dev",
+  "adapter": "omarchy",
+  "session_type": "wayland",
+  "default_mode": "full",
+  "supported_modes": [
+    "full"
+  ],
+  "start_command": "dbus-run-session Hyprland",
+  "risk": "high",
+  "summary": "Beautiful, modern and opinionated Hyprland stack.",
+  "host_changes": [
+    "pacman package installation",
+    "possible writes under /etc and /usr/share",
+    "login and desktop related system changes"
+  ],
+  "profile_changes": [
+    ".config",
+    ".local/share",
+    ".cache",
+    ".local/state"
+  ],
+  "notes": [
+    "This adapter exposes the repo at $HOME/.local/share/omarchy because upstream install.sh expects that path.",
+    "Run analyze before install."
+  ]
+}

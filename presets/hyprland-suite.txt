@@ -1,0 +1,5 @@
+# Install these profiles one after another.
+omarchy
+jakoolit
+ml4w-starter
+ml4w-dotfiles

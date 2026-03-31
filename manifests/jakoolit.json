@@ -1,0 +1,30 @@
+{
+  "name": "jakoolit",
+  "display_name": "JaKooLit Arch-Hyprland",
+  "repo_url": "https://github.com/JaKooLit/Arch-Hyprland.git",
+  "ref": "main",
+  "adapter": "jakoolit",
+  "session_type": "wayland",
+  "default_mode": "full",
+  "supported_modes": [
+    "full"
+  ],
+  "start_command": "dbus-run-session Hyprland",
+  "risk": "high",
+  "summary": "Interactive Hyprland installer for Arch and Arch based systems.",
+  "host_changes": [
+    "pacman package installation",
+    "interactive whiptail choices",
+    "possible login manager and service changes"
+  ],
+  "profile_changes": [
+    ".config",
+    ".local/share",
+    ".cache",
+    ".local/state"
+  ],
+  "notes": [
+    "The upstream installer expects to run from the repo root.",
+    "A profile preset.env file can be used and will be passed as --preset when present."
+  ]
+}

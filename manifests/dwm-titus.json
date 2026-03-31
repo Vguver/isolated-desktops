@@ -1,0 +1,28 @@
+{
+  "name": "dwm-titus",
+  "display_name": "DWM Titus",
+  "repo_url": "https://github.com/ChrisTitusTech/dwm-titus.git",
+  "ref": "main",
+  "adapter": "dwm-titus",
+  "session_type": "x11",
+  "default_mode": "full",
+  "supported_modes": [
+    "full"
+  ],
+  "start_command": "startx",
+  "risk": "high",
+  "summary": "DWM configuration with install script and X11 session flow.",
+  "host_changes": [
+    "pacman package installation",
+    "build and install steps for dwm",
+    "possible display manager enablement"
+  ],
+  "profile_changes": [
+    ".xinitrc",
+    ".config",
+    ".local/share"
+  ],
+  "notes": [
+    "The upstream installer resolves REPO_DIR from the script path, so the checkout location matters less than cwd but full install is still high risk."
+  ]
+}
