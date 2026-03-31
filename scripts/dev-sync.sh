@@ -13,7 +13,7 @@
 #   - creates a snapshot commit
 #   - optionally pushes to remote
 #
-# Version: 2.0
+# Version: 1.0
 # Author: Vguver
 # License: MIT
 
