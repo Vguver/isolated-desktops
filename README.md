@@ -136,17 +136,17 @@ meta.json
 ./install.sh --bootstrap
 scripts/idtool.sh status
 scripts/idtool.sh list
-scripts/idtool.sh analyze omarchy
-scripts/idtool.sh install omarchy
-scripts/idtool.sh update omarchy
-scripts/idtool.sh verify omarchy
-scripts/idtool.sh launcher create omarchy
-scripts/idtool.sh session create omarchy --scope system
-scripts/idtool.sh links prepare omarchy
-scripts/idtool.sh workspace open omarchy
-scripts/idtool.sh sync omarchy
-scripts/idtool.sh export omarchy
-scripts/idtool.sh start omarchy
+scripts/idtool.sh analyze <profile-name>
+scripts/idtool.sh install <profile-name>
+scripts/idtool.sh update <profile-name>
+scripts/idtool.sh verify <profile-name>
+scripts/idtool.sh launcher create <profile-name>
+scripts/idtool.sh session create <profile-name> --scope system
+scripts/idtool.sh links prepare <profile-name>
+scripts/idtool.sh workspace open <profile-name>
+scripts/idtool.sh sync <profile-name>
+scripts/idtool.sh export <profile-name>
+scripts/idtool.sh start <profile-name>
 scripts/idtool.sh completion install
 scripts/idtool.sh self-update
 ```
@@ -177,11 +177,11 @@ By default, managed dotfiles live **inside the profile itself**:
 Useful commands:
 
 ```bash
-scripts/idtool.sh links prepare omarchy
-scripts/idtool.sh links link omarchy .config
-scripts/idtool.sh links adopt omarchy .config
-scripts/idtool.sh links repair omarchy
-scripts/idtool.sh links status omarchy
+scripts/idtool.sh links prepare <profile-name>
+scripts/idtool.sh links link <profile-name> .config
+scripts/idtool.sh links adopt <profile-name> .config
+scripts/idtool.sh links repair <profile-name>
+scripts/idtool.sh links status <profile-name>
 ```
 
 You can still override the dotfiles base with `ID_DOTFILES_ROOT` if you really want an external tree.
@@ -191,8 +191,8 @@ You can still override the dotfiles base with `ID_DOTFILES_ROOT` if you really w
 The project generates real VS Code / VSCodium workspace files.
 
 ```bash
-scripts/idtool.sh workspace create omarchy
-scripts/idtool.sh workspace open omarchy
+scripts/idtool.sh workspace create <profile-name>
+scripts/idtool.sh workspace open <profile-name>
 ```
 
 The generated workspace includes:
@@ -210,8 +210,8 @@ The generated workspace includes:
 Before trusting a profile, use:
 
 ```bash
-scripts/idtool.sh analyze omarchy
-scripts/idtool.sh verify omarchy
+scripts/idtool.sh analyze <profile-name>
+scripts/idtool.sh verify <profile-name>
 ```
 
 To re-run installation logic against an already installed profile:
@@ -223,11 +223,11 @@ scripts/idtool.sh update omarchy
 ## Export, import, trash, and presets
 
 ```bash
-scripts/idtool.sh export omarchy
+scripts/idtool.sh export <profile-name>
 scripts/idtool.sh import ~/.local/share/isolated-desktops/exports/omarchy-20260101-120000.tar.gz
-scripts/idtool.sh remove omarchy
+scripts/idtool.sh remove <profile-name>
 scripts/idtool.sh trash list
-scripts/idtool.sh trash restore 20260101-120000-omarchy
+scripts/idtool.sh trash restore 20260101-120000-<profile-name>
 scripts/idtool.sh preset list
 scripts/idtool.sh preset install hyprland-suite
 ```
