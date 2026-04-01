@@ -1,15 +1,42 @@
 # isolated-desktops
 
-Version: **1.6.0**
+Version: **1.6.1**
 
 `isolated-desktops` is a **session-profile manager** for trying multiple Linux desktop setups on one machine with the **same Linux user** and **separate session homes**.
 
-The repository name stays `isolated-desktops` because it is short and easy to remember, but the project is now documented more precisely:
+The repository name stays `isolated-desktops` because it is short and easy to remember, but the project is intentionally documented more precisely:
 
 - it **does isolate profile-level user files**
 - it **does not isolate the whole operating system**
 
 That means this project is best understood as **session-profile isolation**, not VM-style isolation.
+
+## Quick start
+
+```bash
+git clone https://github.com/Vguver/isolated-desktops.git
+cd isolated-desktops
+chmod +x install.sh
+./install.sh --bootstrap
+
+# Then use the CLI wrapper from the local checkout
+scripts/idtool.sh status
+scripts/idtool.sh analyze omarchy
+scripts/idtool.sh install omarchy
+scripts/idtool.sh verify omarchy
+scripts/idtool.sh launcher create omarchy
+scripts/idtool.sh session create omarchy --scope user --type wayland
+```
+
+## Screenshots
+
+### Status dashboard
+
+![Status dashboard](assets/screenshots/status-dashboard.svg)
+
+### Available profile list
+
+![Profile list](assets/screenshots/profile-list.svg)
 
 ## What is isolated
 
@@ -60,18 +87,25 @@ This replaces the older generic approach of “find any `install.sh` and run it�
 
 ```text
 isolated-desktops/
+├── assets/
+│   └── screenshots/
 ├── install.sh
 ├── manifests/
 ├── presets/
 ├── scripts/
 │   ├── adapters/
 │   ├── commands/
+│   ├── completions/
 │   └── lib/
 ├── docs/
 ├── examples/
 ├── tests/
 ├── CHANGELOG.md
+├── CODE_OF_CONDUCT.md
 ├── CONTRIBUTING.md
+├── INSTALLATION.md
+├── LICENSE
+├── SECURITY.md
 └── VERSION
 ```
 
@@ -100,43 +134,37 @@ meta.json
 
 ```bash
 ./install.sh --bootstrap
-idtool status
-idtool list
-idtool analyze omarchy
-idtool install omarchy
-idtool verify omarchy
-idtool launcher create omarchy
-idtool session create omarchy --scope system
-idtool links prepare omarchy
-idtool workspace open omarchy
-idtool sync omarchy
-idtool export omarchy
-idtool start omarchy
-idtool completion install
-idtool self-update
+scripts/idtool.sh status
+scripts/idtool.sh list
+scripts/idtool.sh analyze omarchy
+scripts/idtool.sh install omarchy
+scripts/idtool.sh update omarchy
+scripts/idtool.sh verify omarchy
+scripts/idtool.sh launcher create omarchy
+scripts/idtool.sh session create omarchy --scope system
+scripts/idtool.sh links prepare omarchy
+scripts/idtool.sh workspace open omarchy
+scripts/idtool.sh sync omarchy
+scripts/idtool.sh export omarchy
+scripts/idtool.sh start omarchy
+scripts/idtool.sh completion install
+scripts/idtool.sh self-update
 ```
 
-## Safety features added in v1.5.0
+## Safety features
+
+Highlights from the hardened 1.5.x and 1.6.x line:
 
 - stale-lock recovery for fallback lock mode
 - transaction-style rollback snapshots stored outside the live profile tree
 - stronger managed-dotfiles adoption with staged copies and restore-on-failure behavior
 - broader default managed paths (`.config`, `.local/bin`, `.local/share`)
-- healthier verification checks for launcher syntax, session file format, and start-command availability
+- healthier verification checks for launcher syntax, session file format, repo integrity, and start-command availability
 - atomic first clone into a temporary checkout before moving into place
 - export archive verification and improved import checks
-- better cleanup of custom manifests and external dotfiles when removing profiles
-- safer shell argument handling and stricter validation helpers
-- improved smoke tests with a fully local test adapter flow
-
-## Additional operational features
-
-New in v1.6.0:
-
-- `idtool completion install` installs Bash completion for the wrapper
-- `idtool self-update` updates the local project checkout safely
-- install reports can now generate a **host cleanup helper script** when package, service, or tracked system-file drift is detected
-- the test suite now includes lifecycle and resilience coverage for clone failures, disk-space guards, interrupted installs, and lock contention
+- safer cleanup of custom manifests and external dotfiles when removing profiles
+- Bash completion support and git-based project self-update
+- lifecycle and resilience tests for clone failures, disk-space guards, interrupted installs, and lock contention
 
 ## Managed dotfiles
 
@@ -146,27 +174,25 @@ By default, managed dotfiles live **inside the profile itself**:
 ~/.local/share/isolated-desktops/profiles/<name>/dotfiles/home/
 ```
 
-That keeps the whole profile easier to understand.
-
 Useful commands:
 
 ```bash
-idtool links prepare omarchy
-idtool links link omarchy .config
-idtool links adopt omarchy .config
-idtool links repair omarchy
-idtool links status omarchy
+scripts/idtool.sh links prepare omarchy
+scripts/idtool.sh links link omarchy .config
+scripts/idtool.sh links adopt omarchy .config
+scripts/idtool.sh links repair omarchy
+scripts/idtool.sh links status omarchy
 ```
 
 You can still override the dotfiles base with `ID_DOTFILES_ROOT` if you really want an external tree.
 
 ## Editor workflow
 
-The project now generates real editor workspace files.
+The project generates real VS Code / VSCodium workspace files.
 
 ```bash
-idtool workspace create omarchy
-idtool workspace open omarchy
+scripts/idtool.sh workspace create omarchy
+scripts/idtool.sh workspace open omarchy
 ```
 
 The generated workspace includes:
@@ -184,39 +210,27 @@ The generated workspace includes:
 Before trusting a profile, use:
 
 ```bash
-idtool analyze omarchy
-idtool verify omarchy
+scripts/idtool.sh analyze omarchy
+scripts/idtool.sh verify omarchy
 ```
 
 To re-run installation logic against an already installed profile:
 
 ```bash
-idtool update omarchy
+scripts/idtool.sh update omarchy
 ```
 
 ## Export, import, trash, and presets
 
 ```bash
-idtool export omarchy
-idtool import ~/.local/share/isolated-desktops/exports/omarchy-20260101-120000.tar.gz
-idtool remove omarchy
-idtool trash list
-idtool trash restore 20260101-120000-omarchy
-idtool preset list
-idtool preset install hyprland-suite
+scripts/idtool.sh export omarchy
+scripts/idtool.sh import ~/.local/share/isolated-desktops/exports/omarchy-20260101-120000.tar.gz
+scripts/idtool.sh remove omarchy
+scripts/idtool.sh trash list
+scripts/idtool.sh trash restore 20260101-120000-omarchy
+scripts/idtool.sh preset list
+scripts/idtool.sh preset install hyprland-suite
 ```
-
-## Legacy wrappers kept for compatibility
-
-These old names still exist and forward to the new structure:
-
-- `scripts/setup_desktops.sh`
-- `scripts/desktop-launch.sh`
-- `scripts/desktop-sessions.sh`
-- `scripts/dev-open.sh`
-- `scripts/dev-sync.sh`
-- `scripts/repos-desktops.sh`
-- `scripts/dotfiles-link.sh`
 
 ## Strong warning
 
@@ -235,8 +249,8 @@ those are still **host-wide changes**.
 Always run:
 
 ```bash
-idtool analyze <name>
-idtool verify <name>
+scripts/idtool.sh analyze <name>
+scripts/idtool.sh verify <name>
 ```
 
 before trusting a profile on your main machine.
@@ -252,6 +266,8 @@ before trusting a profile on your main machine.
 - `docs/FAQ.md`
 - `docs/MIGRATION_FROM_V2.md`
 - `CONTRIBUTING.md`
+- `SECURITY.md`
+- `CODE_OF_CONDUCT.md`
 
 ## Requirements
 
@@ -259,15 +275,29 @@ Required:
 
 - Bash 4+
 - Git
-- Python 3
+- curl
 
 Recommended:
 
-- `pacman` on Arch-based systems for package diff reports
-- VS Code or VSCodium for editing profiles
-- a display manager such as SDDM, GDM, or LightDM
-- `flock` for stronger per-profile locking where available
+- Arch-based host if you want to test Arch-specific desktop installers
+- VS Code or VSCodium for workspace editing
+- a display manager such as SDDM, GDM, or LightDM if you want login-screen sessions
+
+## Publishing and legal notes
+
+This repository uses the MIT License for the project code itself. Third-party desktop projects referenced by manifests keep their **own licenses, trademarks, assets, and install logic**. If you later add screenshots, wallpapers, themes, fonts, or copied upstream files, review the license of each upstream project before redistributing them.
+
+## Community files
+
+This repository includes:
+
+- `LICENSE`
+- `CONTRIBUTING.md`
+- `SECURITY.md`
+- `CODE_OF_CONDUCT.md`
+
+These files help GitHub show a healthier public project profile and make expectations clearer for contributors and users.
 
 ## License
 
-MIT
+Released under the MIT License. See `LICENSE`.

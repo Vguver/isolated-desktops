@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1358" height="280" viewBox="0 0 1358 280" role="img" aria-label="idtool status">
+<rect width="1358" height="280" fill="#0d1117" rx="18"/>
+<rect x="14" y="14" width="1330" height="252" fill="#161b22" stroke="#30363d" rx="14"/>
+<rect x="14" y="14" width="1330" height="34" fill="#161b22" stroke="#30363d" rx="14"/>
+<circle cx="36" cy="31" r="6" fill="#ff5f56"/>
+<circle cx="56" cy="31" r="6" fill="#ffbd2e"/>
+<circle cx="76" cy="31" r="6" fill="#27c93f"/>
+<text x="679.0" y="35" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="14" text-anchor="middle" fill="#8b949e">idtool status</text>
+<text x="28" y="62" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="15" fill="#c9d1d9" xml:space="preserve">PROFILE            INSTALLED  LAUNCHER   SESSION   LINKS     HEALTH   RISK      HOME</text>
+<text x="28" y="84" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="15" fill="#c9d1d9" xml:space="preserve">-------            ---------  --------   -------   -----     ------   ----      ----</text>
+<text x="28" y="106" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="15" fill="#c9d1d9" xml:space="preserve">dwm-titus          no         no         no        -         unknown  high      /home/oai/.local/share/isolated-desktops/profiles/dwm-titus/home</text>
+<text x="28" y="128" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="15" fill="#c9d1d9" xml:space="preserve">jakoolit           no         no         no        -         unknown  high      /home/oai/.local/share/isolated-desktops/profiles/jakoolit/home</text>
+<text x="28" y="150" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="15" fill="#c9d1d9" xml:space="preserve">ml4w-dotfiles      no         no         no        -         unknown  medium    /home/oai/.local/share/isolated-desktops/profiles/ml4w-dotfiles/home</text>
+<text x="28" y="172" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="15" fill="#c9d1d9" xml:space="preserve">ml4w-starter       no         no         no        -         unknown  medium    /home/oai/.local/share/isolated-desktops/profiles/ml4w-starter/home</text>
+<text x="28" y="194" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="15" fill="#c9d1d9" xml:space="preserve">omarchy            no         no         no        -         unknown  high      /home/oai/.local/share/isolated-desktops/profiles/omarchy/home</text>
+</svg>

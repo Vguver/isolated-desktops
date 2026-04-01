@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.6.1
+
+- corrected the MIT copyright holder line in `LICENSE`
+- added a root `SECURITY.md` for responsible vulnerability reporting
+- added a root `CODE_OF_CONDUCT.md` for public GitHub moderation expectations
+- added a shorter Quick Start section near the top of `README.md`
+- added SVG screenshots for the status dashboard and profile list
+- refreshed public-facing documentation for cleaner GitHub publication
+
 ## 1.6.0
 
 - fixed rollback snapshot logging so command-substitution callers do not receive mixed log output
