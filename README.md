@@ -2,14 +2,14 @@
 
 Version: **1.6.1**
 
-`isolated-desktops` is a **session-profile manager** for trying multiple Linux desktop setups on one machine with the **same Linux user** and **separate session homes**.
+`isolated-desktops` is a **session-profile manager** for testing multiple Linux desktop setups on a single machine while keeping the **same Linux user** and **separate session homes**.
 
-The repository name stays `isolated-desktops` because it is short and easy to remember, but the project is intentionally documented more precisely:
+The repository name stays `isolated-desktops` because it is short and memorable, but the project is documented precisely:
 
 - it **does isolate profile-level user files**
 - it **does not isolate the whole operating system**
 
-That means this project is best understood as **session-profile isolation**, not VM-style isolation.
+This project should therefore be understood as **session-profile isolation**, not VM-style or container-style system isolation.
 
 ## Quick start
 
@@ -19,13 +19,27 @@ cd isolated-desktops
 chmod +x install.sh
 ./install.sh --bootstrap
 
-# Then use the CLI wrapper from the local checkout
-scripts/idtool.sh status
+# See the supported profile names from your local checkout
+scripts/idtool.sh list --names-only
+
+# Inspect a profile before installing it
+scripts/idtool.sh analyze <profile-name>
+
+# Install and verify the profile
+scripts/idtool.sh install <profile-name>
+scripts/idtool.sh verify <profile-name>
+
+# Create a launcher and a login session
+scripts/idtool.sh launcher create <profile-name>
+scripts/idtool.sh session create <profile-name> --scope user --type wayland
+```
+
+Example:
+
+```bash
 scripts/idtool.sh analyze omarchy
 scripts/idtool.sh install omarchy
 scripts/idtool.sh verify omarchy
-scripts/idtool.sh launcher create omarchy
-scripts/idtool.sh session create omarchy --scope user --type wayland
 ```
 
 ## Screenshots
@@ -37,6 +51,18 @@ scripts/idtool.sh session create omarchy --scope user --type wayland
 ### Available profile list
 
 ![Profile list](assets/screenshots/profile-list.svg)
+
+## What this project solves
+
+Many third-party desktop projects assume a fresh installation. When you try several of them on one real machine, their user configuration files tend to mix together.
+
+`isolated-desktops` keeps **one Linux account** but lets you start **different sessions** that each point to a different profile home. That makes it much easier to:
+
+- test multiple desktop setups on one system
+- compare how different projects structure their configuration
+- keep the parts you like and discard the rest
+- edit profile files from VS Code or VSCodium through generated workspaces
+- export, import, verify, update, and snapshot profiles with a cleaner workflow
 
 ## What is isolated
 
@@ -58,28 +84,16 @@ Still shared system-wide:
 - display-manager behavior
 - anything an upstream installer decides to change outside the profile home
 
-## What problem this solves
-
-Many third-party desktop setups assume a fresh install. When you try several of them on one real machine, their user configs mix together.
-
-This project keeps **one Linux account** but lets you start **different sessions** that each point to a different profile home. That makes it much easier to:
-
-- test Omarchy, JaKooLit, ML4W, DWM Titus, and similar projects
-- compare how their configs are structured
-- keep what you like and discard what you do not
-- edit everything from VS Code or VSCodium through generated workspaces
-- export, import, verify, update, and snapshot profiles with a cleaner workflow
-
-## Main ideas
+## Main concepts
 
 The project is organized around these layers:
 
-1. **manifests** describe each supported desktop project
-2. **adapters** handle project-specific install behavior
+1. **manifests** describe supported upstream desktop projects
+2. **adapters** handle project-specific installation behavior
 3. **profiles** store the real per-session state on disk
-4. **managed dotfiles** make symlink-based editing and recovery clearer
-5. **editor workspaces** make the project genuinely usable from VS Code or VSCodium
-6. **verification, rollback, trash, export, and presets** make the workflow safer
+4. **managed dotfiles** provide safer symlink-based editing and recovery
+5. **editor workspaces** make profile editing practical from VS Code or VSCodium
+6. **verification, rollback, trash, export, and presets** make the workflow safer and easier to maintain
 
 This replaces the older generic approach of “find any `install.sh` and run it”.
 
@@ -89,7 +103,8 @@ This replaces the older generic approach of “find any `install.sh` and run it�
 isolated-desktops/
 ├── assets/
 │   └── screenshots/
-├── install.sh
+├── docs/
+├── examples/
 ├── manifests/
 ├── presets/
 ├── scripts/
@@ -97,8 +112,6 @@ isolated-desktops/
 │   ├── commands/
 │   ├── completions/
 │   └── lib/
-├── docs/
-├── examples/
 ├── tests/
 ├── CHANGELOG.md
 ├── CODE_OF_CONDUCT.md
@@ -106,13 +119,14 @@ isolated-desktops/
 ├── INSTALLATION.md
 ├── LICENSE
 ├── SECURITY.md
-└── VERSION
+├── VERSION
+└── install.sh
 ```
 
-Installed profile state lives outside the repo under:
+Installed profile state lives outside the repository under:
 
 ```text
-~/.local/share/isolated-desktops/profiles/<name>/
+~/.local/share/isolated-desktops/profiles/<profile-name>/
 ```
 
 Each profile contains:
@@ -151,27 +165,38 @@ scripts/idtool.sh completion install
 scripts/idtool.sh self-update
 ```
 
-## Safety features
+Use `scripts/idtool.sh list --names-only` to discover available profile names.
 
-Highlights from the hardened 1.5.x and 1.6.x line:
+## Typical workflow
 
-- stale-lock recovery for fallback lock mode
-- transaction-style rollback snapshots stored outside the live profile tree
-- stronger managed-dotfiles adoption with staged copies and restore-on-failure behavior
-- broader default managed paths (`.config`, `.local/bin`, `.local/share`)
-- healthier verification checks for launcher syntax, session file format, repo integrity, and start-command availability
-- atomic first clone into a temporary checkout before moving into place
-- export archive verification and improved import checks
-- safer cleanup of custom manifests and external dotfiles when removing profiles
-- Bash completion support and git-based project self-update
-- lifecycle and resilience tests for clone failures, disk-space guards, interrupted installs, and lock contention
+```bash
+# 1. See which profiles are available
+scripts/idtool.sh list --names-only
+
+# 2. Review the install plan
+scripts/idtool.sh analyze <profile-name>
+
+# 3. Install the profile
+scripts/idtool.sh install <profile-name>
+
+# 4. Verify the resulting setup
+scripts/idtool.sh verify <profile-name>
+
+# 5. Create a launcher and an optional login session
+scripts/idtool.sh launcher create <profile-name>
+scripts/idtool.sh session create <profile-name> --scope user --type wayland
+
+# 6. Start the profile or open its editor workspace
+scripts/idtool.sh start <profile-name>
+scripts/idtool.sh workspace open <profile-name>
+```
 
 ## Managed dotfiles
 
 By default, managed dotfiles live **inside the profile itself**:
 
 ```text
-~/.local/share/isolated-desktops/profiles/<name>/dotfiles/home/
+~/.local/share/isolated-desktops/profiles/<profile-name>/dotfiles/home/
 ```
 
 Useful commands:
@@ -184,7 +209,7 @@ scripts/idtool.sh links repair <profile-name>
 scripts/idtool.sh links status <profile-name>
 ```
 
-You can still override the dotfiles base with `ID_DOTFILES_ROOT` if you really want an external tree.
+You can still override the dotfiles base with `ID_DOTFILES_ROOT` if you intentionally want an external tree.
 
 ## Editor workflow
 
@@ -198,7 +223,7 @@ scripts/idtool.sh workspace open <profile-name>
 The generated workspace includes:
 
 - profile home
-- cloned repo
+- cloned repository
 - managed dotfiles
 - logs
 - reports
@@ -217,20 +242,35 @@ scripts/idtool.sh verify <profile-name>
 To re-run installation logic against an already installed profile:
 
 ```bash
-scripts/idtool.sh update omarchy
+scripts/idtool.sh update <profile-name>
 ```
 
 ## Export, import, trash, and presets
 
 ```bash
 scripts/idtool.sh export <profile-name>
-scripts/idtool.sh import ~/.local/share/isolated-desktops/exports/omarchy-20260101-120000.tar.gz
+scripts/idtool.sh import ~/.local/share/isolated-desktops/exports/<profile-name>-YYYYMMDD-HHMMSS.tar.gz
 scripts/idtool.sh remove <profile-name>
 scripts/idtool.sh trash list
-scripts/idtool.sh trash restore 20260101-120000-<profile-name>
+scripts/idtool.sh trash restore <trash-id>
 scripts/idtool.sh preset list
 scripts/idtool.sh preset install hyprland-suite
 ```
+
+## Safety features
+
+Highlights from the hardened 1.5.x and 1.6.x line:
+
+- stale-lock recovery for fallback lock mode
+- transaction-style rollback snapshots stored outside the live profile tree
+- stronger managed-dotfiles adoption with staged copies and restore-on-failure behavior
+- broader default managed paths (`.config`, `.local/bin`, `.local/share`)
+- healthier verification checks for launcher syntax, session file format, repository integrity, and start-command availability
+- atomic first clone into a temporary checkout before moving into place
+- export archive verification and improved import checks
+- safer cleanup of custom manifests and external dotfiles when removing profiles
+- Bash completion support and git-based project self-update
+- lifecycle and resilience tests for clone failures, disk-space guards, interrupted installs, and lock contention
 
 ## Strong warning
 
@@ -249,11 +289,25 @@ those are still **host-wide changes**.
 Always run:
 
 ```bash
-scripts/idtool.sh analyze <name>
-scripts/idtool.sh verify <name>
+scripts/idtool.sh analyze <profile-name>
+scripts/idtool.sh verify <profile-name>
 ```
 
 before trusting a profile on your main machine.
+
+## Requirements
+
+Required:
+
+- Bash 4+
+- Git
+- curl
+
+Recommended:
+
+- an Arch-based host if you want to test Arch-specific desktop installers
+- VS Code or VSCodium for workspace editing
+- a display manager such as SDDM, GDM, or LightDM if you want login-screen sessions
 
 ## Included documentation
 
@@ -268,20 +322,6 @@ before trusting a profile on your main machine.
 - `CONTRIBUTING.md`
 - `SECURITY.md`
 - `CODE_OF_CONDUCT.md`
-
-## Requirements
-
-Required:
-
-- Bash 4+
-- Git
-- curl
-
-Recommended:
-
-- Arch-based host if you want to test Arch-specific desktop installers
-- VS Code or VSCodium for workspace editing
-- a display manager such as SDDM, GDM, or LightDM if you want login-screen sessions
 
 ## Publishing and legal notes
 
